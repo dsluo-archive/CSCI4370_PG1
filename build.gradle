@@ -22,7 +22,6 @@ tasks.withType(JavaCompile).each {
 }
 
 
-
 test {
     jvmArgs(['--enable-preview'])
 }
