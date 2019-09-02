@@ -258,14 +258,40 @@ public class Table
      * @return a table with tuples satisfying the equality predicate
      */
     public Table join(String attributes1, String attributes2, Table table2) {
-        out.println("RA> " + name + ".join (" + attributes1 + ", " + attributes2 + ", "
-                + table2.name + ")");
+        out.println("RA> " + name + ".join (" + attributes1 + ", " + attributes2 + ", " + table2.name + ")");
 
         var t_attrs = attributes1.split(" ");
         var u_attrs = attributes2.split(" ");
+
+        if (t_attrs.length != u_attrs.length)
+            throw new ArrayIndexOutOfBoundsException("Attributes must be of equal length.");
+
         var rows = new ArrayList<Comparable[]>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        for (var these : this.tuples) {
+            for (var those : table2.tuples) {
+                boolean add = true;
+                for (int i = 0; i < t_attrs.length; i++) {
+                    var thisAttr = t_attrs[i];
+                    var thatAttr = u_attrs[i];
+
+                    var thisCol = this.col(thisAttr);
+                    var thatCol = table2.col(thatAttr);
+
+                    var thisVal = these[thisCol];
+                    var thatVal = those[thatCol];
+
+                    if (thisVal.compareTo(thatVal) != 0) {
+                        add = false;
+                        break;
+                    }
+                }
+                if (add) {
+                    var newRow = ArrayUtil.concat(these, those);
+                    rows.add(newRow);
+                }
+            }
+        }
 
         return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
                 ArrayUtil.concat(domain, table2.domain), key, rows);
