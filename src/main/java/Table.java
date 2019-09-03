@@ -320,7 +320,32 @@ public class Table
      * @return a table with tuples satisfying the equality predicate
      */
     public Table h_join(String attributes1, String attributes2, Table table2) {
-        return null;
+        out.println("RA> " + name + ".join (" + attributes1 + ", " + attributes2 + ", " + table2.name + ")");
+
+        var theseAttrs = attributes1.split(" ");
+        var thoseAttrs = attributes2.split(" ");
+
+        if (theseAttrs.length != thoseAttrs.length)
+            throw new ArrayIndexOutOfBoundsException("Attributes must be of equal length.");
+
+        var rows = new ArrayList<Comparable[]>();
+
+        // hash phase
+        // {attribute: {value: rows with that value}}
+        var hashes = new HashMap<String, HashMap<Comparable, List<Comparable[]>>>();
+        for (String attr : theseAttrs) {
+            var attrHash = new HashMap<Comparable, List<Comparable[]>>();
+
+            int col = this.col(attr);
+            for (Comparable[] row : table2.tuples) {
+                var valRows = attrHash.getOrDefault(row[col], new ArrayList<>());
+                valRows.add(row);
+            }
+            hashes.put(attr, attrHash);
+        }
+
+        return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
+                ArrayUtil.concat(domain, table2.domain), key, rows);
     } // h_join
 
     /************************************************************************************
