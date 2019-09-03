@@ -328,24 +328,43 @@ public class Table
         if (theseAttrs.length != thoseAttrs.length)
             throw new ArrayIndexOutOfBoundsException("Attributes must be of equal length.");
 
-        var rows = new ArrayList<Comparable[]>();
+        var newRows = new ArrayList<Comparable[]>();
 
         // hash phase
         // {attribute: {value: rows with that value}}
-        var hashes = new HashMap<String, HashMap<Comparable, List<Comparable[]>>>();
+        var hashes = new ArrayList<HashMap<Comparable, List<Comparable[]>>>();
         for (String attr : theseAttrs) {
             var attrHash = new HashMap<Comparable, List<Comparable[]>>();
 
             int col = this.col(attr);
-            for (Comparable[] row : table2.tuples) {
-                var valRows = attrHash.getOrDefault(row[col], new ArrayList<>());
-                valRows.add(row);
+            for (Comparable[] row : this.tuples) {
+                var valRows = attrHash.get(row[col]);
+                if (valRows == null) {
+                    valRows = new ArrayList<>();
+                    valRows.add(row);
+                    attrHash.put(row[col], valRows);
+                } else {
+                    valRows.add(row);
+                }
             }
-            hashes.put(attr, attrHash);
+            hashes.add(attrHash);
+        }
+
+        for (int i = 0; i < thoseAttrs.length; i++) {
+            String attr = thoseAttrs[i];
+            var attrHash = hashes.get(i);
+            var col = table2.col(attr);
+            for (var thatRow : table2.tuples) {
+                if (attrHash.containsKey(thatRow[col])) {
+                    var theseRows = attrHash.get(thatRow[col]);
+                    for (var thisRow : theseRows)
+                        newRows.add(ArrayUtil.concat(thisRow, thatRow));
+                }
+            }
         }
 
         return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
-                ArrayUtil.concat(domain, table2.domain), key, rows);
+                ArrayUtil.concat(domain, table2.domain), key, newRows);
     } // h_join
 
     /************************************************************************************
