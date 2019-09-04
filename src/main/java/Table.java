@@ -269,7 +269,7 @@ public class Table
         if (t_attrs.length != u_attrs.length)
             throw new ArrayIndexOutOfBoundsException("Attributes must be of equal length.");
 
-        var rows = new ArrayList<Comparable[]>();
+        var newRows = new ArrayList<Comparable[]>();
 
         for (var these : this.tuples) {
             for (var those : table2.tuples) {
@@ -291,13 +291,13 @@ public class Table
                 }
                 if (add) {
                     var newRow = ArrayUtil.concat(these, those);
-                    rows.add(newRow);
+                    newRows.add(newRow);
                 }
             }
         }
 
-        return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
-                ArrayUtil.concat(domain, table2.domain), key, rows);
+        return new Table(name + count++, renameDupeCols(table2),
+                ArrayUtil.concat(domain, table2.domain), key, newRows);
     } // join
 
     /************************************************************************************
@@ -323,7 +323,7 @@ public class Table
      * @return a table with tuples satisfying the equality predicate
      */
     public Table h_join(String attributes1, String attributes2, Table table2) {
-        out.println("RA> " + name + ".join (" + attributes1 + ", " + attributes2 + ", " + table2.name + ")");
+        out.println("RA> " + name + ".h_join (" + attributes1 + ", " + attributes2 + ", " + table2.name + ")");
 
         var theseAttrs = attributes1.split(" ");
         var thoseAttrs = attributes2.split(" ");
@@ -333,8 +333,7 @@ public class Table
 
         var newRows = new ArrayList<Comparable[]>();
 
-        // hash phase
-        // {attribute: {value: rows with that value}}
+        // hashes = [{value: rows with that value}... for each attribute]
         var hashes = new ArrayList<HashMap<Comparable, List<Comparable[]>>>();
         for (String attr : theseAttrs) {
             var attrHash = new HashMap<Comparable, List<Comparable[]>>();
@@ -353,22 +352,36 @@ public class Table
             hashes.add(attrHash);
         }
 
-        for (int i = 0; i < thoseAttrs.length; i++) {
-            String attr = thoseAttrs[i];
-            var attrHash = hashes.get(i);
-            var col = table2.col(attr);
-            for (var thatRow : table2.tuples) {
+        for (var thatRow : table2.tuples) {
+            HashSet<List<Comparable>> toAdd = new HashSet<>();
+            for (int i = 0; i < thoseAttrs.length; i++) {
+                String attr = thoseAttrs[i];
+                var attrHash = hashes.get(i);
+                var col = table2.col(attr);
                 if (attrHash.containsKey(thatRow[col])) {
                     var theseRows = attrHash.get(thatRow[col]);
-                    for (var thisRow : theseRows)
-                        newRows.add(ArrayUtil.concat(thisRow, thatRow));
+                    theseRows.forEach(it -> toAdd.add(Arrays.asList(it)));
                 }
             }
+            toAdd.forEach(it -> newRows.add(ArrayUtil.concat(it.toArray(new Comparable[0]), thatRow)));
         }
 
-        return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
+        return new Table(name + count++, renameDupeCols(table2),
                 ArrayUtil.concat(domain, table2.domain), key, newRows);
     } // h_join
+
+    private String[] renameDupeCols(Table table2) {
+        var newAttrs = new ArrayList<>(Arrays.asList(this.attribute));
+        var attrSet = new HashSet<>(Arrays.asList(this.attribute));
+        String[] table2Attribute = table2.getAttribute();
+        for (String attr : table2Attribute)
+            if (attrSet.contains(attr))
+                newAttrs.add(attr + "2");
+            else
+                newAttrs.add(attr);
+
+        return newAttrs.toArray(new String[0]);
+    }
 
     /************************************************************************************
      * Join this table and table2 by performing an "natural join".  Tuples from both tables
@@ -641,6 +654,10 @@ public class Table
 
     public String[] getKey() {
         return key;
+    }
+
+    public Class[] getDomain() {
+        return domain;
     }
 
     public boolean equalsIgnoreName(Object obj) {
