@@ -643,15 +643,12 @@ public class Table
         return key;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public boolean equalsIgnoreName(Object obj) {
         if (obj == null)
             return false;
         if (!(obj instanceof Table))
             return false;
         var other = (Table) obj;
-        if (!this.getName().equals(other.getName()))
-            return false;
         if (!Arrays.equals(this.getAttribute(), other.getAttribute()))
             return false;
         if (!Arrays.equals(this.getKey(), other.getKey()))
@@ -661,7 +658,16 @@ public class Table
         if (!theseTuples.equals(otherTuples))
             return false;
         return true;
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!this.equalsIgnoreName(obj))
+            return false;
+        var other = (Table) obj;
+        if (!this.getName().equals(other.getName()))
+            return false;
+        return true;
     }
 } // Table class
 
