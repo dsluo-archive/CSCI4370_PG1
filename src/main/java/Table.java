@@ -3,14 +3,14 @@
  * @file Table.java
  *
  * @author John Miller
+ * @author David Luo
  */
 
 import java.io.*;
 import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import static java.lang.Boolean.*;
 import static java.lang.System.out;
 
 /****************************************************************************************
@@ -331,6 +331,21 @@ public class Table
         if (theseAttrs.length != thoseAttrs.length)
             throw new ArrayIndexOutOfBoundsException("Attributes must be of equal length.");
 
+        var newRows = hJoinImpl(table2, theseAttrs, thoseAttrs);
+
+        return new Table(name + count++, renameDupeCols(table2),
+                ArrayUtil.concat(domain, table2.domain), key, newRows);
+    } // h_join
+
+    /**
+     * Implementation of hash join for use in h_join and natural join
+     *
+     * @param table2     the other table to join
+     * @param theseAttrs attributes on this table to check
+     * @param thoseAttrs attributes on the other table to check
+     * @return the rows of the new table.
+     */
+    private List<Comparable[]> hJoinImpl(Table table2, String[] theseAttrs, String[] thoseAttrs) {
         var newRows = new ArrayList<Comparable[]>();
 
         // hashes = [{value: rows with that value}... for each attribute]
@@ -365,10 +380,8 @@ public class Table
             }
             toAdd.forEach(it -> newRows.add(ArrayUtil.concat(it.toArray(new Comparable[0]), thatRow)));
         }
-
-        return new Table(name + count++, renameDupeCols(table2),
-                ArrayUtil.concat(domain, table2.domain), key, newRows);
-    } // h_join
+        return newRows;
+    }
 
     private String[] renameDupeCols(Table table2) {
         var newAttrs = new ArrayList<>(Arrays.asList(this.attribute));
@@ -396,14 +409,56 @@ public class Table
     public Table join(Table table2) {
         out.println("RA> " + name + ".join (" + table2.name + ")");
 
-        var rows = new ArrayList<Comparable[]>();
+        var theseAttrs = new HashSet<>(Arrays.asList(this.getAttribute()));
+        var thoseAttrs = new HashSet<>(Arrays.asList(table2.getAttribute()));
 
-        //  T O   B E   I M P L E M E N T E D 
+        var commonAttrs = new HashSet<>(theseAttrs);
+        commonAttrs.retainAll(thoseAttrs);
+
+        var attributes = commonAttrs.toArray(new String[0]);
+
+        var dupeIndicies = removeDupeCols(table2);
+        dupeIndicies.sort((it1, it2) -> -it1.compareTo(it2));
+
+        var newAttributes = new ArrayList<>(Arrays.asList(ArrayUtil.concat(this.getAttribute(), table2.getAttribute())));
+        var newDomains = new ArrayList<>(Arrays.asList(ArrayUtil.concat(this.getDomain(), table2.getDomain())));
+        var newRows = this.hJoinImpl(table2, attributes, attributes);
+        for (int index : dupeIndicies) {
+            newAttributes.remove(index);
+            newDomains.remove(index);
+        }
+
+        for (int i = 0; i < newRows.size(); i++) {
+            var rowAsList = new ArrayList<>(Arrays.asList(newRows.get(i)));
+            for (int index : dupeIndicies)
+                rowAsList.remove(index);
+            newRows.set(i, rowAsList.toArray(new Comparable[0]));
+        }
 
         // FIX - eliminate duplicate columns
-        return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
-                ArrayUtil.concat(domain, table2.domain), key, rows);
+        return new Table(name + count++, newAttributes.toArray(new String[0]), newDomains.toArray(new Class[0]), key, newRows);
     } // join
+
+    /**
+     * Helper method to remove duplicate columns
+     *
+     * @param table2 the table to join
+     * @return an array of indices to delete in the new table
+     */
+    private List<Integer> removeDupeCols(Table table2) {
+        var theseAttrs = new HashSet<>(Arrays.asList(this.getAttribute()));
+
+        var indicies = new ArrayList<Integer>();
+
+        var index = this.getAttribute().length;
+        for (var attr : table2.getAttribute()) {
+            if (theseAttrs.contains(attr))
+                indicies.add(index);
+            index++;
+        }
+
+        return indicies;
+    }
 
     /************************************************************************************
      * Return the column position for the given attribute name.
