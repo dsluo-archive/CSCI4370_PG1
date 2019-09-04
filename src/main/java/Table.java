@@ -222,7 +222,13 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        Table table1 = this;
+        for (Comparable[] x: table1.tuples) {
+            rows.add(x);
+        }
+        for (Comparable[] x: table2.tuples) {
+            rows.add(x);
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // union
@@ -241,8 +247,19 @@ public class Table
         if (!compatible(table2)) return null;
 
         List<Comparable[]> rows = new ArrayList<>();
-
-        //  T O   B E   I M P L E M E N T E D 
+        boolean brk = false;
+        Table table1 = this;
+        for (Comparable[] x1: table1.tuples) {
+            for(Comparable[] x2: table2.tuples){
+                if(Arrays.equals(x1, x2)){
+                    brk = true;
+                    break;
+                }
+            }
+            if(!brk){
+                rows.add(x1);
+            }
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // minus
