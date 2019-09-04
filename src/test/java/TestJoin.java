@@ -61,9 +61,9 @@ public class TestJoin {
     public void nestedLoopJoin() {
         var nameJoin = student.join("name", "name", ta);
         assertTrue(equijoin.equalsIgnoreName(nameJoin));
-        var idJoin = student.join("name", "name", ta);
+        var idJoin = student.join("id", "id", ta);
         assertTrue(equijoin.equalsIgnoreName(idJoin));
-        var nameIdJoin = student.join("name", "name", ta);
+        var nameIdJoin = student.join("name id", "name id", ta);
         assertTrue(equijoin.equalsIgnoreName(nameIdJoin));
     }
 
@@ -71,9 +71,9 @@ public class TestJoin {
     public void hashedJoin() {
         var nameJoin = student.h_join("name", "name", ta);
         assertTrue(equijoin.equalsIgnoreName(nameJoin));
-        var idJoin = student.h_join("name", "name", ta);
+        var idJoin = student.h_join("id", "id", ta);
         assertTrue(equijoin.equalsIgnoreName(idJoin));
-        var nameIdJoin = student.h_join("name", "name", ta);
+        var nameIdJoin = student.h_join("name id", "name id", ta);
         assertTrue(equijoin.equalsIgnoreName(nameIdJoin));
     }
 
