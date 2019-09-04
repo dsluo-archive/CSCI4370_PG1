@@ -2,7 +2,7 @@ import static org.junit.Assert.*;
 import java.lang.reflect.*;
 import java.util.List;
 
-public class UnionMinusTest {
+public class TestUnionMinus {
 
     /************************************************************************************
      * Tests to make sure that performing union on union incompatible tables returns null
@@ -58,26 +58,8 @@ public class UnionMinusTest {
         truth1.insert(film2);
         truth1.insert(film3);
         truth1.insert(film4);
-        Field uniontuple = null;
-        Field truthtuple = null;
-        try {
-            uniontuple = union1.getClass().getDeclaredField("tuples");
-            uniontuple.setAccessible(true);
-            uniontuple.get(union1);
-        }
-        catch(Exception e){
-            System.out.println("Trouble accessing.");
-        }
-        try {
-            truthtuple = truth1.getClass().getDeclaredField("tuples");
-            truthtuple.setAccessible(true);
-            truthtuple.get(truth1);
-        }
-        catch(Exception e){
-            System.out.println("Trouble accessing.");
-        }
 
-        assertEquals(uniontuple, truthtuple);
+        assertTrue(truth1.equalsIgnoreName(union1));
         assertEquals(null, union2);
     }
 
@@ -130,26 +112,8 @@ public class UnionMinusTest {
                 "String Integer Integer String String Integer", "title year");
         truth1.insert(film0);
         truth1.insert(film1);
-        Field minustuple = null;
-        Field truthtuple = null;
-        try {
-            minustuple = minus1.getClass().getDeclaredField("tuples");
-            minustuple.setAccessible(true);
-            minustuple.get(minus1);
-        }
-        catch(Exception e){
-            System.out.println("Trouble accessing.");
-        }
-        try {
-            truthtuple = truth1.getClass().getDeclaredField("tuples");
-            truthtuple.setAccessible(true);
-            truthtuple.get(truth1);
-        }
-        catch(Exception e){
-            System.out.println("Trouble accessing.");
-        }
 
-        assertEquals(minustuple, truthtuple);
+        assertTrue(minus1.equalsIgnoreName(truth1));
         assertEquals(null, minus2);
     }
 }
