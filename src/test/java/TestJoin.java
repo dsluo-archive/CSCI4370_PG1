@@ -6,46 +6,15 @@ import static org.junit.Assert.assertTrue;
 
 public class TestJoin {
 
-    private Table movie;
-    private Table studio;
-    private Table equijoin;
 
     private Table student;
     private Table ta;
+
+    private Table equijoin;
     private Table naturalJoin;
 
     @Before
     public void setUp() {
-        movie = new Table("movie", "title year length genre studioName producerNo",
-                "String Integer Integer String String Integer", "title year");
-        var film0 = new Comparable[]{"Star_Wars", 1977, 124, "sciFi", "Fox", 12345};
-        var film1 = new Comparable[]{"Star_Wars_2", 1980, 124, "sciFi", "Fox", 12345};
-        var film2 = new Comparable[]{"Rocky", 1985, 200, "action", "Universal", 12125};
-        var film3 = new Comparable[]{"Rambo", 1978, 100, "action", "Universal", 32355};
-        movie.insert(film0);
-        movie.insert(film1);
-        movie.insert(film2);
-        movie.insert(film3);
-
-        studio = new Table("studio", "name address presNo",
-                "String String Integer", "name");
-        var studio0 = new Comparable[]{"Fox", "Los_Angeles", 7777};
-        var studio1 = new Comparable[]{"Universal", "Universal_City", 8888};
-        var studio2 = new Comparable[]{"DreamWorks", "Universal_City", 9999};
-        studio.insert(studio0);
-        studio.insert(studio1);
-        studio.insert(studio2);
-
-        equijoin = new Table("equijoin", "title year length genre studioName producerNo name address presNo",
-                "String Integer Integer String String Integer String String Integer", "title year");
-        var join0 = new Comparable[]{"Star_Wars", 1977, 124, "sciFi", "Fox", 12345, "Fox", "Los_Angeles", 7777};
-        var join1 = new Comparable[]{"Star_Wars_2", 1980, 124, "sciFi", "Fox", 12345, "Fox", "Los_Angeles", 7777};
-        var join2 = new Comparable[]{"Rocky", 1985, 200, "action", "Universal", 12125, "Universal", "Universal_City", 8888};
-        var join3 = new Comparable[]{"Rambo", 1978, 100, "action", "Universal", 32355, "Universal", "Universal_City", 8888};
-        equijoin.insert(join0);
-        equijoin.insert(join1);
-        equijoin.insert(join2);
-        equijoin.insert(join3);
 
         student = new Table("student", "name id year gpa", "String Integer String Double", "id");
         var student0 = new Comparable[]{"Fred", 0, "Freshman", 3.5};
@@ -63,6 +32,13 @@ public class TestJoin {
         ta.insert(ta0);
         ta.insert(ta1);
 
+        equijoin = new Table("equijoin", "name id year gpa name2 id2 course",
+                "String Integer String Double String Integer String", "id");
+        var eqJoin0 = new Comparable[]{"Susan", 2, "Graduate", 3.9, "Susan", 2, "Underwater Basket Weaving"};
+        var eqJoin1 = new Comparable[]{"Robert", 3, "Senior", 3.1, "Robert", 3, "Explosive Demolition 101"};
+        equijoin.insert(eqJoin0);
+        equijoin.insert(eqJoin1);
+
         naturalJoin = new Table("naturalJoin", "name id year gpa course",
                 "String Integer Integer Float String", "id");
         var natJoin0 = new Comparable[]{"Susan", 2, "Graduate", 3.9, "Underwater Basket Weaving"};
@@ -74,26 +50,30 @@ public class TestJoin {
 
     @After
     public void tearDown() {
-        movie = null;
-        studio = null;
+        student = null;
+        ta = null;
+        equijoin = null;
+        naturalJoin = null;
     }
 
     @Test
     public void nestedLoopJoin() {
-        var joined = movie.join("studioName", "name", studio);
-        assertTrue(equijoin.equalsIgnoreName(joined));
+        var nameJoin = student.join("name", "name", ta);
+        assertTrue(equijoin.equalsIgnoreName(nameJoin));
+        var idJoin = student.join("name", "name", ta);
+        assertTrue(equijoin.equalsIgnoreName(idJoin));
+        var nameIdJoin = student.join("name", "name", ta);
+        assertTrue(equijoin.equalsIgnoreName(nameIdJoin));
     }
-
-//    @Test
-//    public void indexedJoin() {
-//        var joined = movie.i_join("studioName", "name", studio);
-//        assertTrue(equijoin.equalsIgnoreName(joined));
-//    }
 
     @Test
     public void hashedJoin() {
-        var joined = movie.h_join("studioName", "name", studio);
-        assertTrue(equijoin.equalsIgnoreName(joined));
+        var nameJoin = student.h_join("name", "name", ta);
+        assertTrue(equijoin.equalsIgnoreName(nameJoin));
+        var idJoin = student.h_join("name", "name", ta);
+        assertTrue(equijoin.equalsIgnoreName(idJoin));
+        var nameIdJoin = student.h_join("name", "name", ta);
+        assertTrue(equijoin.equalsIgnoreName(nameIdJoin));
     }
 
     @Test
