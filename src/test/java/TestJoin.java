@@ -47,7 +47,7 @@ public class TestJoin {
         equijoin.insert(join2);
         equijoin.insert(join3);
 
-        student = new Table("student", "name id year gpa", "String Integer Integer Float", "id");
+        student = new Table("student", "name id year gpa", "String Integer String Double", "id");
         var student0 = new Comparable[]{"Fred", 0, "Freshman", 3.5};
         var student1 = new Comparable[]{"Sally", 1, "Sophomore", 2.8};
         var student2 = new Comparable[]{"Susan", 2, "Graduate", 3.9};
