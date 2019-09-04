@@ -84,11 +84,11 @@ public class TestJoin {
         assertTrue(equijoin.equalsIgnoreName(joined));
     }
 
-    @Test
-    public void indexedJoin() {
-        var joined = movie.i_join("studioName", "name", studio);
-        assertTrue(equijoin.equalsIgnoreName(joined));
-    }
+//    @Test
+//    public void indexedJoin() {
+//        var joined = movie.i_join("studioName", "name", studio);
+//        assertTrue(equijoin.equalsIgnoreName(joined));
+//    }
 
     @Test
     public void hashedJoin() {
