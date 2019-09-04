@@ -583,8 +583,12 @@ public class Table
             return false;
         if (!Arrays.equals(this.getKey(), other.getKey()))
             return false;
-        Set theseTuples = new HashSet<>(this.getTuples());
-        Set otherTuples = new HashSet<>(other.getTuples());
+
+        Set theseTuples = new HashSet<>();
+        this.getTuples().forEach(it -> theseTuples.add(Arrays.asList(it)));
+        Set otherTuples = new HashSet<>();
+        other.getTuples().forEach(it -> otherTuples.add(Arrays.asList(it)));
+
         if (!theseTuples.equals(otherTuples))
             return false;
         return true;
