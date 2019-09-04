@@ -10,3 +10,4 @@ Building is done using `sbt`.
 |run    |`sbt run`       |`run`           |
 |test   |`sbt test`      |`test`          |
 
+When running select `[2] MovieDB`.
