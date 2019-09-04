@@ -4,9 +4,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
+/**
+ * @author David Luo
+ */
 public class TestJoin {
-
-
     private Table student;
     private Table ta;
 
