@@ -41,7 +41,7 @@ public class TestJoin {
         equijoin.insert(eqJoin1);
 
         naturalJoin = new Table("naturalJoin", "name id year gpa course",
-                "String Integer Integer Float String", "id");
+                "String Integer String Double String", "id");
         var natJoin0 = new Comparable[]{"Susan", 2, "Graduate", 3.9, "Underwater Basket Weaving"};
         var natJoin1 = new Comparable[]{"Robert", 3, "Senior", 3.1, "Explosive Demolition 101"};
         naturalJoin.insert(natJoin0);
