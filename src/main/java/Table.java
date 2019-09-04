@@ -170,7 +170,14 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //Go through all the tuples of table
+        for(int i = 0; i < tuples.size(); i++) {
+            //Get only the columns that are needed
+            var t = this.extract(this.tuples.get(i), attrs);
+            //Insert the tuple to the list
+            rows.add(t);
+        }
+
 
         return new Table(name + count++, attrs, colDomain, newKey, rows);
     } // project
@@ -203,7 +210,19 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //Search the tuples to find the ones that match the key
+        for(int i = 0; i < tuples.size(); i++) {
+            //get an individual tuple
+            var t = this.extract(this.tuples.get(i), this.key);
+            //turn it in a KeyType
+            KeyType comparison = new KeyType(new Comparable[] {t[0]});
+
+            //compare the keyVal to the tuple
+            if(keyVal.compareTo(comparison) == 0){
+                //if true add to the new table
+                rows.add(this.tuples.get(i));
+            }
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // select
