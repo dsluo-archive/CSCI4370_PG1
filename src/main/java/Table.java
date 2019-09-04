@@ -253,6 +253,8 @@ public class Table
      * names by append "2" to the end of any duplicate attribute name.  Implement using
      * a Nested Loop Join algorithm.
      *
+     * @author David Luo
+     *
      * #usage movie.join ("studioNo", "name", studio)
      *
      * @param attributes1  the attributes of this table to be compared (Foreign Key)
@@ -317,6 +319,8 @@ public class Table
      * Join this table and table2 by performing an "equi-join".  Same as above, but implemented
      * using a Hash Join algorithm.
      *
+     * @author David Luo
+     *
      * @param attributes1  the attributes of this table to be compared (Foreign Key)
      * @param attributes2  the attributes of table2 to be compared (Primary Key)
      * @param table2      the rhs table in the join operation
@@ -344,6 +348,7 @@ public class Table
      * @param theseAttrs attributes on this table to check
      * @param thoseAttrs attributes on the other table to check
      * @return the rows of the new table.
+     * @author David Luo
      */
     private List<Comparable[]> hJoinImpl(Table table2, String[] theseAttrs, String[] thoseAttrs) {
         var newRows = new ArrayList<Comparable[]>();
@@ -383,6 +388,13 @@ public class Table
         return newRows;
     }
 
+    /**
+     * Helper method to rename duplicate columns for equi-join.
+     *
+     * @param table2 the table to join
+     * @return the new renamed attributes
+     * @author David Luo
+     */
     private String[] renameDupeCols(Table table2) {
         var newAttrs = new ArrayList<>(Arrays.asList(this.attribute));
         var attrSet = new HashSet<>(Arrays.asList(this.attribute));
@@ -400,6 +412,10 @@ public class Table
      * Join this table and table2 by performing an "natural join".  Tuples from both tables
      * are compared requiring common attributes to be equal.  The duplicate column is also
      * eliminated.
+     *
+     * Internally uses h_join.
+     *
+     * @author David Luo
      *
      * #usage movieStar.join (starsIn)
      *
@@ -444,6 +460,7 @@ public class Table
      *
      * @param table2 the table to join
      * @return an array of indices to delete in the new table
+     * @author David Luo
      */
     private List<Integer> removeDupeCols(Table table2) {
         var theseAttrs = new HashSet<>(Arrays.asList(this.getAttribute()));
@@ -645,7 +662,9 @@ public class Table
 
     /************************************************************************************
      * Check the size of the tuple (number of elements in list) as well as the type of
-     * each value to ensure it is from the right domain. 
+     * each value to ensure it is from the right domain.
+     *
+     * @author David Luo
      *
      * @param t  the tuple as a list of attribute values
      * @return whether the tuple has the right size and values that comply
@@ -715,6 +734,13 @@ public class Table
         return domain;
     }
 
+    /**
+     * Checks for equality, ignoring the name of the table
+     *
+     * @param obj the object to compare
+     * @return is equal?
+     * @author David Luo
+     */
     public boolean equalsIgnoreName(Object obj) {
         if (obj == null)
             return false;
@@ -736,6 +762,13 @@ public class Table
         return true;
     }
 
+    /**
+     * Checks for equality
+     *
+     * @param obj the object to compare
+     * @return is equal?
+     * @author David Luo
+     */
     @Override
     public boolean equals(Object obj) {
         if (!this.equalsIgnoreName(obj))
