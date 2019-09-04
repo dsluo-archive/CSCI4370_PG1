@@ -178,7 +178,6 @@ public class Table
             rows.add(t);
         }
 
-
         return new Table(name + count++, attrs, colDomain, newKey, rows);
     } // project
 

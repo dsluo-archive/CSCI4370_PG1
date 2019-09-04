@@ -1,6 +1,15 @@
+/*****************************************************************************************
+ * @file TestProjectSelect.java
+ *
+ * @author Miruna Cristian
+ */
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
+/*****************************************************************************************
+ * The TestProjectSelect class tests the project and select methods.
+ */
 public class TestProjectSelect {
 
     private Table movie;
@@ -10,6 +19,9 @@ public class TestProjectSelect {
     private Table projectNewKey;
     private Table select;
 
+    /************************************************************************************
+     * Sets up all the tables before testings
+     */
     @Before
     public void setUp(){
         movie = new Table("movie", "title year length genre studioName producerNo",
@@ -60,12 +72,21 @@ public class TestProjectSelect {
         select.insert(select0);
     }
 
+    /************************************************************************************
+     * Clears all the tables after testing
+     */
     @After
     public void tearDown(){
         movie = null;
         movieStar = null;
+        projectOldKey = null;
+        projectNewKey = null;
+        select = null;
     }
 
+    /************************************************************************************
+     * Tests the projection method if the old key is included in the projection
+     */
     @Test
     public void projecttest1(){
         var movieproject = movie.project("title year genre");
@@ -73,6 +94,9 @@ public class TestProjectSelect {
         assertTrue(projectOldKey.equalsIgnoreName(movieproject));
     }
 
+    /************************************************************************************
+     * Tests the projection method if the old key is not included in the projection
+     */
     @Test
     public void projecttest2(){
         var movieproject = movie.project("year length genre studioName");
@@ -80,6 +104,9 @@ public class TestProjectSelect {
         assertTrue(projectNewKey.equalsIgnoreName(movieproject));
     }
 
+    /************************************************************************************
+     * Test the selection method with a key
+     */
     @Test
     public void selecttest(){
         var movieStarSelect = movieStar.select(new KeyType("Carrie_Fisher"));
