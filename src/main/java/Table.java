@@ -561,5 +561,37 @@ public class Table
         return obj;
     } // extractDom
 
+    public String[] getAttribute() {
+        return attribute;
+    }
+
+    public List<Comparable[]> getTuples() {
+        return tuples;
+    }
+
+    public String[] getKey() {
+        return key;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (!(obj instanceof Table))
+            return false;
+        var other = (Table) obj;
+        if (!this.getName().equals(other.getName()))
+            return false;
+        if (!Arrays.equals(this.getAttribute(), other.getAttribute()))
+            return false;
+        if (!Arrays.equals(this.getKey(), other.getKey()))
+            return false;
+        Set theseTuples = new HashSet<>(this.getTuples());
+        Set otherTuples = new HashSet<>(other.getTuples());
+        if (!theseTuples.equals(otherTuples))
+            return false;
+        return true;
+
+    }
 } // Table class
 
