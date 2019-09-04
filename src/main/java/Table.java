@@ -83,12 +83,15 @@ public class Table
      * Make a map (index) given the MapType.
      */
     private static Map<KeyType, Comparable[]> makeMap() {
-        return switch (mType) {
-            case TREE_MAP -> new TreeMap<>();
+        switch (mType) {
+            case TREE_MAP:
+                return new TreeMap<>();
 //        case LINHASH_MAP -> new LinHashMap <> (KeyType.class, Comparable [].class);
 //        case BPTREE_MAP  -> new BpTreeMap <> (KeyType.class, Comparable [].class);
-            default -> null;
-        }; // switch
+            default:
+                return null;
+        }
+        // switch
     } // makeMap
 
     //-----------------------------------------------------------------------------------
