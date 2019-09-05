@@ -32,9 +32,16 @@ David Luo:
 * along with a few helper methods.
 
 Ravi Parashar:
-    Union(), Minus(), TestUnionMinus.java
+* Union() 
+* Minus() 
+* TestUnionMinus.java
 
 Miruna Cristian:
 * Project()
 * Select()
 * TestProjectSelect.java
+
+Devan Vitha
+* Integration Testing
+* General debuging testing
+* javadoc and UML diagrams 
