@@ -23,8 +23,17 @@ When running select `[2] MovieDB`.
 
 ## Work Division
 David Luo:
+* `join` (nested loop equijoin)
+* `h_join` (hash table equijoin)
+* `join` (natural join)
+* `typeCheck`
+* `TestJoin.java`
+* `build.sbt`
+* along with a few helper methods.
 
 Ravi Parashar:
 
 Miruna Cristian:
-    Project(), Select(), TestProjectSelect.java
+* Project()
+* Select()
+* TestProjectSelect.java
