@@ -25,6 +25,7 @@ When running select `[2] MovieDB`.
 David Luo:
 
 Ravi Parashar:
+    Union(), Minus(), TestUnionMinus.java
 
 Miruna Cristian:
     Project(), Select(), TestProjectSelect.java
