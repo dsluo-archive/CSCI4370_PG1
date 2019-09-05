@@ -20,3 +20,11 @@ Building is done using `sbt`.
 |test   |`sbt test`      |`test`          |
 
 When running select `[2] MovieDB`.
+
+## Work Division
+David Luo:
+
+Ravi Parashar:
+
+Miruna Cristian:
+    Project(), Select(), TestProjectSelect.java
