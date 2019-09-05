@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 import static java.lang.System.arraycopy;
 
-class ArrayUtil {
+class ArrayUtil  {
     /************************************************************************************
      * Concatenate two arrays of type T to form a new wider array.
      *

@@ -115,6 +115,14 @@ public class KeyType
         out.println("key1.equals (key3): " + key1.equals(key3));
         out.println("key1.hashCode () == key2.hashCode (): " + (key1.hashCode() == key2.hashCode()));
         out.println("key1.hashCode () == key3.hashCode (): " + (key1.hashCode() == key3.hashCode()));
+
+        var key1String = key1.toString();
+        boolean toString = false;
+        if((key1.toString().compareTo( "Key ( Star_Wars_2 1980 )")) == 0) {
+            toString = true;
+        }
+        out.println("key1.toString() works? : " + toString );
+
     } // main
 
 } // KeyType class

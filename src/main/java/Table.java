@@ -2,15 +2,17 @@
 /****************************************************************************************
  * @file Table.java
  *
- * @author John Miller
+ * @author  David Luo
+ * @author  Ravi Parashar
+ * @author  Miruna Cristian
+ * @author  Devan Vitha
  */
 
 import java.io.*;
 import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import static java.lang.Boolean.*;
 import static java.lang.System.out;
 
 /****************************************************************************************
@@ -170,7 +172,13 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //Go through all the tuples of table
+        for(int i = 0; i < tuples.size(); i++) {
+            //Get only the columns that are needed
+            var t = this.extract(this.tuples.get(i), attrs);
+            //Insert the tuple to the list
+            rows.add(t);
+        }
 
         return new Table(name + count++, attrs, colDomain, newKey, rows);
     } // project
@@ -194,7 +202,7 @@ public class Table
     /************************************************************************************
      * Select the tuples satisfying the given key predicate (key = value).  Use an index
      * (Map) to retrieve the tuple with the given key value.
-     *
+     * @author Miruna Cristian
      * @param keyVal  the given key value
      * @return a table with the tuple satisfying the key predicate
      */
@@ -203,18 +211,32 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //Search the tuples to find the ones that match the key
+        for(int i = 0; i < tuples.size(); i++) {
+            //get an individual tuple
+            var t = this.extract(this.tuples.get(i), this.key);
+            //turn it in a KeyType
+            KeyType comparison = new KeyType(new Comparable[] {t[0]});
+
+            //compare the keyVal to the tuple
+            if(keyVal.compareTo(comparison) == 0){
+                //if true add to the new table
+                rows.add(this.tuples.get(i));
+            }
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // select
 
     /************************************************************************************
-     * Union this table and table2.  Check that the two tables are compatible.
+     * Union this table and table2.  Check that the two tables are compatible. Puts all
+     * tuples in this table and table2 into one table, not checking for duplicates.
      *
      * #usage movie.union (show)
      *
      * @param table2  the rhs table in the union operation
-     * @return a table representing the union
+     * @return a table representing the union or null if the tables are union incompatible
+     * @author Ravi Parashar
      */
     public Table union(Table table2) {
         out.println("RA> " + name + ".union (" + table2.name + ")");
@@ -222,27 +244,47 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        Table table1 = this;
+        for (Comparable[] x: table1.tuples) {
+            rows.add(x);
+        }
+        for (Comparable[] x: table2.tuples) {
+            rows.add(x);
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // union
 
     /************************************************************************************
      * Take the difference of this table and table2.  Check that the two tables are
-     * compatible.
+     * compatible. Puts all tuples in this table but not in table2 into one table.
      *
      * #usage movie.minus (show)
      *
      * @param table2  The rhs table in the minus operation
-     * @return a table representing the difference
+     * @return a table representing the difference or null if the tables are union incompatible
+     * @author Ravi Parashar
      */
     public Table minus(Table table2) {
         out.println("RA> " + name + ".minus (" + table2.name + ")");
         if (!compatible(table2)) return null;
 
         List<Comparable[]> rows = new ArrayList<>();
-
-        //  T O   B E   I M P L E M E N T E D 
+        boolean brk = false;
+        Table table1 = this;
+        for (Comparable[] x1: table1.tuples) {
+            for(Comparable[] x2: table2.tuples){
+                if(Arrays.equals(x1, x2)){
+                    brk = true;
+                    break;
+                } else {
+                    brk = false;
+                }
+            }
+            if(!brk){
+                rows.add(x1);
+            }
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // minus
@@ -253,6 +295,8 @@ public class Table
      * names by append "2" to the end of any duplicate attribute name.  Implement using
      * a Nested Loop Join algorithm.
      *
+     * @author David Luo
+     *
      * #usage movie.join ("studioNo", "name", studio)
      *
      * @param attributes1  the attributes of this table to be compared (Foreign Key)
@@ -261,17 +305,43 @@ public class Table
      * @return a table with tuples satisfying the equality predicate
      */
     public Table join(String attributes1, String attributes2, Table table2) {
-        out.println("RA> " + name + ".join (" + attributes1 + ", " + attributes2 + ", "
-                + table2.name + ")");
+        out.println("RA> " + name + ".join (" + attributes1 + ", " + attributes2 + ", " + table2.name + ")");
 
         var t_attrs = attributes1.split(" ");
         var u_attrs = attributes2.split(" ");
-        var rows = new ArrayList<Comparable[]>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        if (t_attrs.length != u_attrs.length)
+            throw new ArrayIndexOutOfBoundsException("Attributes must be of equal length.");
 
-        return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
-                ArrayUtil.concat(domain, table2.domain), key, rows);
+        var newRows = new ArrayList<Comparable[]>();
+
+        for (var these : this.tuples) {
+            for (var those : table2.tuples) {
+                boolean add = true;
+                for (int i = 0; i < t_attrs.length; i++) {
+                    var thisAttr = t_attrs[i];
+                    var thatAttr = u_attrs[i];
+
+                    var thisCol = this.col(thisAttr);
+                    var thatCol = table2.col(thatAttr);
+
+                    var thisVal = these[thisCol];
+                    var thatVal = those[thatCol];
+
+                    if (thisVal.compareTo(thatVal) != 0) {
+                        add = false;
+                        break;
+                    }
+                }
+                if (add) {
+                    var newRow = ArrayUtil.concat(these, those);
+                    newRows.add(newRow);
+                }
+            }
+        }
+
+        return new Table(name + count++, renameDupeCols(table2),
+                ArrayUtil.concat(domain, table2.domain), key, newRows);
     } // join
 
     /************************************************************************************
@@ -291,19 +361,103 @@ public class Table
      * Join this table and table2 by performing an "equi-join".  Same as above, but implemented
      * using a Hash Join algorithm.
      *
+     * @author David Luo
+     *
      * @param attributes1  the attributes of this table to be compared (Foreign Key)
      * @param attributes2  the attributes of table2 to be compared (Primary Key)
      * @param table2      the rhs table in the join operation
      * @return a table with tuples satisfying the equality predicate
      */
     public Table h_join(String attributes1, String attributes2, Table table2) {
-        return null;
+        out.println("RA> " + name + ".h_join (" + attributes1 + ", " + attributes2 + ", " + table2.name + ")");
+
+        var theseAttrs = attributes1.split(" ");
+        var thoseAttrs = attributes2.split(" ");
+
+        if (theseAttrs.length != thoseAttrs.length)
+            throw new ArrayIndexOutOfBoundsException("Attributes must be of equal length.");
+
+        var newRows = hJoinImpl(table2, theseAttrs, thoseAttrs);
+
+        return new Table(name + count++, renameDupeCols(table2),
+                ArrayUtil.concat(domain, table2.domain), key, newRows);
     } // h_join
+
+    /**
+     * Implementation of hash join for use in h_join and natural join
+     *
+     * @param table2     the other table to join
+     * @param theseAttrs attributes on this table to check
+     * @param thoseAttrs attributes on the other table to check
+     * @return the rows of the new table.
+     * @author David Luo
+     */
+    private List<Comparable[]> hJoinImpl(Table table2, String[] theseAttrs, String[] thoseAttrs) {
+        var newRows = new ArrayList<Comparable[]>();
+
+        // hashes = [{value: rows with that value}... for each attribute]
+        var hashes = new ArrayList<HashMap<Comparable, List<Comparable[]>>>();
+        for (String attr : theseAttrs) {
+            var attrHash = new HashMap<Comparable, List<Comparable[]>>();
+
+            int col = this.col(attr);
+            for (Comparable[] row : this.tuples) {
+                var valRows = attrHash.get(row[col]);
+                if (valRows == null) {
+                    valRows = new ArrayList<>();
+                    valRows.add(row);
+                    attrHash.put(row[col], valRows);
+                } else {
+                    valRows.add(row);
+                }
+            }
+            hashes.add(attrHash);
+        }
+
+        for (var thatRow : table2.tuples) {
+            HashSet<List<Comparable>> toAdd = new HashSet<>();
+            for (int i = 0; i < thoseAttrs.length; i++) {
+                String attr = thoseAttrs[i];
+                var attrHash = hashes.get(i);
+                var col = table2.col(attr);
+                if (attrHash.containsKey(thatRow[col])) {
+                    var theseRows = attrHash.get(thatRow[col]);
+                    theseRows.forEach(it -> toAdd.add(Arrays.asList(it)));
+                }
+            }
+            toAdd.forEach(it -> newRows.add(ArrayUtil.concat(it.toArray(new Comparable[0]), thatRow)));
+        }
+        return newRows;
+    }
+
+    /**
+     * Helper method to rename duplicate columns for equi-join.
+     *
+     * @param table2 the table to join
+     * @return the new renamed attributes
+     * @author David Luo
+     */
+    private String[] renameDupeCols(Table table2) {
+        var newAttrs = new ArrayList<>(Arrays.asList(this.attribute));
+        var attrSet = new HashSet<>(Arrays.asList(this.attribute));
+        String[] table2Attribute = table2.getAttribute();
+        for (String attr : table2Attribute)
+            if (attrSet.contains(attr))
+                newAttrs.add(attr + "2");
+            else
+                newAttrs.add(attr);
+
+        return newAttrs.toArray(new String[0]);
+    }
 
     /************************************************************************************
      * Join this table and table2 by performing an "natural join".  Tuples from both tables
      * are compared requiring common attributes to be equal.  The duplicate column is also
      * eliminated.
+     *
+     * Internally uses h_join.
+     *
+     * @author David Luo
      *
      * #usage movieStar.join (starsIn)
      *
@@ -313,14 +467,57 @@ public class Table
     public Table join(Table table2) {
         out.println("RA> " + name + ".join (" + table2.name + ")");
 
-        var rows = new ArrayList<Comparable[]>();
+        var theseAttrs = new HashSet<>(Arrays.asList(this.getAttribute()));
+        var thoseAttrs = new HashSet<>(Arrays.asList(table2.getAttribute()));
 
-        //  T O   B E   I M P L E M E N T E D 
+        var commonAttrs = new HashSet<>(theseAttrs);
+        commonAttrs.retainAll(thoseAttrs);
+
+        var attributes = commonAttrs.toArray(new String[0]);
+
+        var dupeIndicies = removeDupeCols(table2);
+        dupeIndicies.sort((it1, it2) -> -it1.compareTo(it2));
+
+        var newAttributes = new ArrayList<>(Arrays.asList(ArrayUtil.concat(this.getAttribute(), table2.getAttribute())));
+        var newDomains = new ArrayList<>(Arrays.asList(ArrayUtil.concat(this.getDomain(), table2.getDomain())));
+        var newRows = this.hJoinImpl(table2, attributes, attributes);
+        for (int index : dupeIndicies) {
+            newAttributes.remove(index);
+            newDomains.remove(index);
+        }
+
+        for (int i = 0; i < newRows.size(); i++) {
+            var rowAsList = new ArrayList<>(Arrays.asList(newRows.get(i)));
+            for (int index : dupeIndicies)
+                rowAsList.remove(index);
+            newRows.set(i, rowAsList.toArray(new Comparable[0]));
+        }
 
         // FIX - eliminate duplicate columns
-        return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
-                ArrayUtil.concat(domain, table2.domain), key, rows);
+        return new Table(name + count++, newAttributes.toArray(new String[0]), newDomains.toArray(new Class[0]), key, newRows);
     } // join
+
+    /**
+     * Helper method to remove duplicate columns
+     *
+     * @param table2 the table to join
+     * @return an array of indices to delete in the new table
+     * @author David Luo
+     */
+    private List<Integer> removeDupeCols(Table table2) {
+        var theseAttrs = new HashSet<>(Arrays.asList(this.getAttribute()));
+
+        var indicies = new ArrayList<Integer>();
+
+        var index = this.getAttribute().length;
+        for (var attr : table2.getAttribute()) {
+            if (theseAttrs.contains(attr))
+                indicies.add(index);
+            index++;
+        }
+
+        return indicies;
+    }
 
     /************************************************************************************
      * Return the column position for the given attribute name.
@@ -407,7 +604,7 @@ public class Table
     } // printIndex
 
     /************************************************************************************
-     * Load the table with the given name into memory. 
+     * Load the table with the given name into memory.
      *
      * @param name  the name of the table to load
      */
@@ -507,7 +704,9 @@ public class Table
 
     /************************************************************************************
      * Check the size of the tuple (number of elements in list) as well as the type of
-     * each value to ensure it is from the right domain. 
+     * each value to ensure it is from the right domain.
+     *
+     * @author David Luo
      *
      * @param t  the tuple as a list of attribute values
      * @return whether the tuple has the right size and values that comply
@@ -573,6 +772,17 @@ public class Table
         return key;
     }
 
+    public Class[] getDomain() {
+        return domain;
+    }
+
+    /**
+     * Checks for equality, ignoring the name of the table
+     *
+     * @param obj the object to compare
+     * @return is equal?
+     * @author David Luo
+     */
     public boolean equalsIgnoreName(Object obj) {
         if (obj == null)
             return false;
@@ -594,6 +804,13 @@ public class Table
         return true;
     }
 
+    /**
+     * Checks for equality
+     *
+     * @param obj the object to compare
+     * @return is equal?
+     * @author David Luo
+     */
     @Override
     public boolean equals(Object obj) {
         if (!this.equalsIgnoreName(obj))
